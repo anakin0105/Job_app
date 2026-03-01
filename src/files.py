@@ -93,18 +93,12 @@ class Json_handler(File_handler):
     Наследуется от абстрактного класса File_handler.
     Хранит вакансии в виде словаря {id: данные_вакансии} внутри JSON-файла.
 
-    Аналогия из игры:
-    Представь, что это твой «инвентарь избранного» в RPG.
-    Каждая вакансия — это предмет с уникальным ID.
-    Ты можешь добавлять предметы, удалять по ID, очищать весь инвентарь.
-    Всё сохраняется в файле на диске (JSON).
-
     Важные особенности текущей реализации:
     • При добавлении вакансии файл **перезаписывается** целиком
     • Данные хранится в виде словаря, а не списка → быстрый поиск и отсутствие дублей по id
     • При инициализации без имени файла создаётся новый файл с текущей датой-временем"""
 
-    def __init__(self, filename: Optional[str] = "all_searches.json"):
+    def __init__(self, filename: Optional[str] = None):
         """Инициализирует хранилище вакансий в JSON-файле.
 
         Параметры:
@@ -116,19 +110,28 @@ class Json_handler(File_handler):
             • Если файл новый — создаётся пустой JSON []
             • Если файл уже существует — данные загружаются при вызове open_file()
             • Атрибут self.data — рабочая копия данных в памяти (словарь)"""
+        project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))  # два раза вверх от src/files.py
+        data_dir = os.path.join(project_root, "data")
+        os.makedirs(data_dir, exist_ok=True)  # создаём папку, если нет
 
-        if filename is not None:
-            self.__filename = filename
-        else:
+        if filename is None:
+            data_dir = "data"
+            os.makedirs(data_dir, exist_ok=True)
             fn = time.strftime("%Y%m%d-%H%M%S.json")
-            self.__filename = fn
+            filename = os.path.join(data_dir, fn)
+        else:
+            # Если передали имя — делаем абсолютный путь
+            if not os.path.isabs(filename):
+                filename = os.path.join(data_dir, filename)
 
-        # Создаём файл только если его нет
+        self.__filename = filename
+
+        # Создаём файл, если его нет
         if not os.path.exists(self.__filename):
             with open(self.__filename, "w", encoding="utf-8") as f:
                 json.dump([], f, ensure_ascii=False, indent=2)
 
-        self.data = {}
+        self.data: dict[str, dict] = {}
         self.open_file()
 
         print(f"Загружено {len(self.data)} вакансий из {self.__filename}")

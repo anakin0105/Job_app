@@ -115,11 +115,17 @@ def test_open_file_unknown_format(tmp_path_json):
 
 
 def test_init_filename_none(tmp_path, monkeypatch):
-    """filename=None → имя файла генерируется автоматически по дате."""
     monkeypatch.chdir(tmp_path)
+
     storage = Json_handler(filename=None)
+
+    data_dir = tmp_path / "data"
+    assert data_dir.is_dir()
+
+    json_files = list(data_dir.glob("*.json"))
+    assert len(json_files) == 1, "Должен создаться ровно один JSON-файл в data/"
+
     assert storage.data == {}
-    assert any(f.endswith(".json") for f in os.listdir(tmp_path))
 
 
 # ---------------------------------------------------------------------------
@@ -309,12 +315,31 @@ def test_open_file_unknown_format2(tmp_path_json):
 
 
 def test_init_filename_none3(tmp_path, monkeypatch):
-    """filename=None → имя файла генерируется автоматически по дате."""
+    """filename=None → файл создаётся в подпапке data/ с именем по дате."""
     monkeypatch.chdir(tmp_path)
-    storage = Json_handler(filename=None)
-    assert storage.data == {}
-    assert any(f.endswith(".json") for f in os.listdir(tmp_path))
 
+    storage = Json_handler(filename=None)
+
+    # Проверяем создание папки data/
+    data_dir = tmp_path / "data"
+    assert data_dir.is_dir(), "Папка data/ не создалась"
+
+    # Ищем все .json-файлы в data/
+    json_files = list(data_dir.glob("*.json"))
+    assert len(json_files) == 1, "Должен создаться ровно один JSON-файл в data/"
+
+    file_name = json_files[0].name
+    assert file_name.endswith(".json"), "Файл должен заканчиваться на .json"
+
+    # Проверяем формат имени: YYYYMMDD-HHMMSS.json
+    name_without_ext = file_name[:-5]  # убираем .json
+    assert len(name_without_ext) == 15, "Имя без расширения должно быть 15 символов (YYYYMMDD-HHMMSS)"
+    assert name_without_ext[8] == "-", "Между датой и временем должно быть тире"
+    assert name_without_ext[:8].isdigit(), "Первые 8 символов — дата YYYYMMDD"
+    assert name_without_ext[9:].isdigit(), "После тире — время HHMMSS"
+
+    # Проверяем, что хранилище пустое
+    assert storage.data == {}, "При создании нового файла хранилище должно быть пустым"
 
 def test_open_file_unexpected_exception(tmp_path_json, monkeypatch):
     """Неизвестная ошибка при чтении файла → data = {}, не падает."""

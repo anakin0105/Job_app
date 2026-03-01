@@ -1,5 +1,4 @@
 from typing import Any, Dict, Optional
-
 from tabulate import tabulate
 
 
@@ -218,7 +217,7 @@ class Vacancy:
         """Строковое представление вакансии"""
 
         return (
-            f"Вакансия: {self.title}\n"
+            f"Вакансия: {self.name or 'Без названия'}\n"
             f"Ссылка: {self.url}\n"
             f"Зарплата: {self.salary_from} до {self.salary_to} {self.currency or 'Не указано'}\n"
             f"Обязанности: {self.responsibility}\n"
@@ -375,16 +374,14 @@ class Vacancy:
         print(f"   🏙️ {city} • {company}")
         print(f"   🔗 {self.url}")
 
-        if self.requirement and self.requirement != "Не указано":
-            req = self.requirement[:140].rstrip() + (
-                "..." if len(self.requirement) > 140 else ""
-            )
+        if self.requirement and self.requirement != 'Не указано':
+            req = (self.requirement[:140].rstrip()
+                   + ("..." if len(self.requirement) > 140 else ""))
             print(f"   📋 Требования: {req}")
 
-        if self.responsibility and self.responsibility != "Не указано":
-            resp = self.responsibility[:140].rstrip() + (
-                "..." if len(self.responsibility) > 140 else ""
-            )
+        if self.responsibility and self.responsibility != 'Не указано':
+            resp = (self.responsibility[:140].rstrip()
+                    + ("..." if len(self.responsibility) > 140 else ""))
             print(f"   ⚙️ Обязанности: {resp}")
 
         print("─" * 90)
