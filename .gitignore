@@ -4,6 +4,8 @@ venv/
 .venv/
 env/
 ENV/
+# Переменные окружения и секреты
+.env
 
 # Python кэш
 __pycache__/

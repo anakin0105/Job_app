@@ -1,9 +1,10 @@
 import time
 from abc import ABC, abstractmethod
 from typing import Dict, List
-
 import requests as r
-
+import os
+from dotenv import load_dotenv
+HH_API_BASE_URL = os.getenv("HH_API_BASE_URL", "https://api.hh.ru/vacancies")
 
 class Api_handler(ABC):
     """Абстрактный базовый класс для работы с API сервисов вакансий.
@@ -105,7 +106,7 @@ class Hh_handler(Api_handler):
         Вызывает конструктор родительского класса.
         """
         super().__init__()
-        self.__base_url = "https://api.hh.ru/vacancies"
+        self.__base_url = HH_API_BASE_URL
         self.__params = None
         self.__last_response = None
 
