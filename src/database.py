@@ -1,6 +1,6 @@
 """Модуль PostgreSQL для курсовой — чистая версия без скрытых символов."""
 
-
+import time
 import os
 from typing import List, Tuple
 import psycopg2
@@ -99,6 +99,7 @@ def fill_database() -> None:
             print(f"   ✅ {emp['name']}: добавлено {added} вакансий")
         except Exception as e:
             print(f"   ⚠️ Проблема с {name}: {e}")
+        time.sleep(5)
 
     print("🎉 Заполнение завершено!\n")
 

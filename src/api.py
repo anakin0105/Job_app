@@ -3,8 +3,9 @@ from abc import ABC, abstractmethod
 from typing import Dict, List
 import requests as r
 import os
-from src.auth import HhAuth
 from dotenv import load_dotenv
+from src.auth import HhAuth
+load_dotenv(override=True)
 HH_API_BASE_URL = os.getenv("HH_API_BASE_URL", "https://api.hh.ru/vacancies")
 
 class Api_handler(ABC):
@@ -192,12 +193,12 @@ class Hh_handler(Api_handler):
                 if response.status_code != 200:
                     # Для 429 делаем retry, для остальных — кидаем сразу
                     if response.status_code == 429:
-                        print("429 Too Many Requests — сервер просит подождать...")
-                        HhAuth._access_token = None  # сбрасываем
-                        headers = HhAuth.get_headers()# получаем новый
-                        self.__headers = headers
-                        continue
-                    else:
+                        wait = 15
+                        print(f"429 Too Many Requests — ждём {wait} сек...")
+                        time.sleep(wait)
+                        # одна повторная попытка только для 429
+                        response = r.get(url, params=params, headers=headers, timeout=15)
+                else:
                         response.raise_for_status()  # кидает HTTPError для 4xx/5xx
 
                 print("Успех! Получен ответ 200")

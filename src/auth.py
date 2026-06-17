@@ -13,8 +13,7 @@ class HhAuth:
     _access_token: Optional[str] = None
 
     @classmethod
-    def get_token(cls, retries: int = 2) -> str:
-        """Получает access_token с повторными попытками"""
+    def get_token(cls, retries: int = 1) -> str:
         if cls._access_token:
             return cls._access_token
 
@@ -31,29 +30,23 @@ class HhAuth:
             "client_secret": client_secret,
         }
 
-        for attempt in range(1, retries + 1):
-            try:
-                print(f"🔑 Попытка получения токена {attempt}/{retries}...")
-                response = requests.post(
-                    cls.TOKEN_URL,
-                    data=data,
-                    timeout=15,
-                    verify=True  # можно поставить False для теста (не рекомендуется)
-                )
-                response.raise_for_status()
-                token_data = response.json()
-                cls._access_token = token_data["access_token"]
-                print("✅ OAuth токен успешно получен!")
-                return cls._access_token
+        try:
+            print("🔑 Получение токена...")
+            response = requests.post(cls.TOKEN_URL, data=data, timeout=15)
+            response.raise_for_status()
+            cls._access_token = response.json()["access_token"]
+            print("✅ OAuth токен успешно получен!")
+            return cls._access_token
 
-            except requests.exceptions.SSLError as e:
-                print(f"❌ SSL-ошибка при получении токена: {e}")
-                if attempt == retries:
-                    print("💡 Попробуй отключить VPN/антивирус или запустить позже")
-                time.sleep(2)
-            except Exception as e:
-                print(f"❌ Ошибка получения токена: {e}")
-                time.sleep(2)
+        except requests.exceptions.SSLError as e:
+            print(f"❌ SSL-ошибка: {e}")
+            print("💡 Попробуй отключить VPN/антивирус")
+
+        except requests.exceptions.HTTPError as e:
+            print(f"❌ Ошибка HTTP {e.response.status_code}: {e.response.json()}")
+
+        except Exception as e:
+            print(f"❌ Ошибка получения токена: {e}")
 
         print("⚠️ Не удалось получить токен. Продолжаем без авторизации.")
         return ""
