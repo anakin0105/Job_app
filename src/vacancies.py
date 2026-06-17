@@ -250,9 +250,7 @@ class Vacancy:
         # Зарплата — как в show_beautiful
         if self.salary_from == 0 and self.salary_to == 0:
             salary_str = "По договорённости"
-        elif self.salary_from == 0 and self.salary_to == 0:
-            salary_str = "Зарплата не указана"
-        else:
+        else:  # ← ИСПРАВЛЕНО: убрали дублирующееся условие
             fr = (
                 f"от {self.salary_from:,}".replace(",", " ") if self.salary_from else ""
             )

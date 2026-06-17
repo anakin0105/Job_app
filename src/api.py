@@ -3,6 +3,7 @@ from abc import ABC, abstractmethod
 from typing import Dict, List
 import requests as r
 import os
+from src.auth import HhAuth
 from dotenv import load_dotenv
 HH_API_BASE_URL = os.getenv("HH_API_BASE_URL", "https://api.hh.ru/vacancies")
 
@@ -109,6 +110,7 @@ class Hh_handler(Api_handler):
         self.__base_url = HH_API_BASE_URL
         self.__params = None
         self.__last_response = None
+        self.__headers = HhAuth.get_headers()
 
     def _connect_api(self, url: str, params: dict = None) -> r.Response:
         """Реализация абстрактного метода из Api_handler.
@@ -173,7 +175,7 @@ class Hh_handler(Api_handler):
         • Если часто получаете 429 — добавьте больше задержки между вызовами get_vacancies()
         • В production-коде (не в курсовой) можно читать заголовок Retry-After из ответа 429
         """
-        headers = {"User-Agent": "VacancySearcherBot/1.0 (coursework)"}
+        headers = self.__headers.copy()
 
         max_attempts = 3
         for attempt in range(1, max_attempts + 1):
@@ -184,14 +186,16 @@ class Hh_handler(Api_handler):
                     url,
                     params=params,
                     headers=headers,
-                    timeout=10,
+                    timeout=15,
                 )
 
                 if response.status_code != 200:
                     # Для 429 делаем retry, для остальных — кидаем сразу
                     if response.status_code == 429:
                         print("429 Too Many Requests — сервер просит подождать...")
-                        time.sleep(2 ** (attempt - 1))
+                        HhAuth._access_token = None  # сбрасываем
+                        headers = HhAuth.get_headers()# получаем новый
+                        self.__headers = headers
                         continue
                     else:
                         response.raise_for_status()  # кидает HTTPError для 4xx/5xx
