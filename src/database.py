@@ -79,27 +79,59 @@ def fill_database() -> None:
     hh = Hh_handler()
     db = DBManager()
 
-    companies = ["Яндекс", "Сбер", "Тинькофф", "VK", "Ozon", "Wildberries", "Avito", "МТС", "Газпром нефть", "Росатом"]
+    companies = ["Яндекс", "Сбер", "Тинькофф", "VK", "Ozon", "Wildberries",
+                 "Avito", "МТС", "Газпром нефть", "Росатом"]
 
     for name in companies:
         try:
-            resp = hh.get("api.hh.ru/vacancies", {"text": name, "per_page": 1})
+            print(f"\n📌 Ищем компанию: {name}")
+
+            # 1. Ищем вакансии компании
+            resp = hh.get("https://api.hh.ru/vacancies", {
+                "text": name,
+                "per_page": 1,
+                "employer_id": None  # на всякий случай
+            })
+
             items = resp.json().get("items", [])
             if not items:
+                print(f"   ⚠️ Вакансий по {name} не найдено")
                 continue
-            emp = items[0]
-            emp_id = db.add_employer(emp["id"], emp["name"])
 
-            vacs = hh.get_vacancies(params={"employer_id": emp["id"]}, num=25)
+            vacancy = items[0]
+            employer = vacancy.get("employer", {})
+            employer_hh_id = employer.get("id")
+            employer_name = employer.get("name") or name
+
+            if not employer_hh_id:
+                print(f"   ⚠️ Не удалось получить employer_id для {name}")
+                continue
+
+            emp_id = db.add_employer(employer_hh_id, employer_name)
+
+            # 2. Получаем вакансии этой компании
+            vacs = hh.get_vacancies(
+                params={"employer_id": employer_hh_id},
+                num=30,  # чуть больше, но не 100
+                verbal=False
+            )
+
             added = 0
             for v in vacs:
-                vac = Vacancy(v)
-                db.add_vacancy(vac.to_dict(), emp_id)
-                added += 1
-            print(f"   ✅ {emp['name']}: добавлено {added} вакансий")
+                try:
+                    vac = Vacancy(v)
+                    db.add_vacancy(vac.to_dict(), emp_id)
+                    added += 1
+                except Exception as e:
+                    continue
+
+            print(f"   ✅ {employer_name}: добавлено {added} вакансий")
+
+            time.sleep(2)  # ← Очень важно! HH.ru не любит частые запросы
+
         except Exception as e:
-            print(f"   ⚠️ Проблема с {name}: {e}")
-        time.sleep(5)
+            print(f"   ❌ Проблема с {name}: {e}")
+            time.sleep(5)
 
     print("🎉 Заполнение завершено!\n")
 
