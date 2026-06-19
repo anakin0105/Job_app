@@ -1,7 +1,38 @@
 # Created by venv; see https://docs.python.org/3/library/venv.html
+# Виртуальное окружение
+venv/
 .venv/
-.idea/
+env/
+ENV/
+# Переменные окружения и секреты
+.env
+
+# Python кэш
 __pycache__/
+*.py[cod]
 *.pyc
+*.pyo
+*.pyd
 
+# PyCharm / IDE
+.idea/
+*.iml
+*.iws
 
+# Тесты и покрытие
+.pytest_cache/
+.coverage
+coverage.xml
+htmlcov/
+
+# Данные проекта (вакансии, тесты, временные файлы)
+*.json
+all_searches.json
+test.json
+mock_vacancies.json
+
+# Poetry lock (не коммитим, достаточно pyproject.toml)
+poetry.lock
+
+# Логи и временные файлы
+*.log
