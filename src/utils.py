@@ -1,3 +1,8 @@
+
+"""Модуль с вспомогательными функциями для работы с пользователем.
+
+Содержит меню, поиск, вывод вакансий и другие утилиты для JSON-режима.
+"""
 import logging
 from datetime import datetime
 from typing import List, Union
@@ -37,6 +42,12 @@ current_date = datetime.now()
 
 
 def new_search(hh, storage):
+    """Выполняет новый поиск вакансий по запросу пользователя и добавляет их в избранное.
+
+        Args:
+            hh (Hh_handler): Обработчик API hh.ru.
+            storage (Json_handler): Объект хранилища для сохранения вакансий.
+        """
     query = input("Поисковый запрос (например: python django remote) ").strip()
     if not query:
         return print("Запрос пустой")
@@ -61,6 +72,7 @@ def new_search(hh, storage):
 
 
 def show_all(storage):
+    """Выводит все сохранённые вакансии в красивом формате с использованием метода show_beautiful()."""
     all_vacs = storage.get_all()
     if not all_vacs:
         print("Сейчас в избранном ничего нет")
@@ -82,6 +94,7 @@ def show_all(storage):
 
 
 def top_n(storage):
+    """Показывает топ-N вакансий по зарплате из избранного."""
     all_vacs = storage.get_all()
     if not all_vacs:
         return print("Нет вакансий")
@@ -143,6 +156,7 @@ def compare_vacancies(storage):
 
 
 def find_by_keyword(storage):
+    """Ищет вакансии по ключевому слову среди сохранённых."""
     word = input("Ключевое слово: ").strip().lower()
     if not word:
         return
@@ -153,6 +167,7 @@ def find_by_keyword(storage):
 
 
 def delete_by_id(storage):
+    """Удаляет одну вакансию по ID."""
     vid = input("ID для удаления: ").strip()
     if storage.delete_data(vid):
         print("Удалена")
@@ -161,6 +176,7 @@ def delete_by_id(storage):
 
 
 def delete_menu(storage):
+    """Меню удаления вакансий (по ID или всех сразу)."""
     print("\n  1 — Удалить вакансию по ID")
     print("  2 — Удалить все вакансии")
     print("  0 — Назад")
