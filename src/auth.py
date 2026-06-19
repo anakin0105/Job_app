@@ -32,7 +32,7 @@ class HhAuth:
 
         try:
             print("🔑 Получение токена...")
-            response = requests.post(cls.TOKEN_URL, data=data, timeout=15)
+            response = requests.post(cls.TOKEN_URL, data=data, timeout=30)
             response.raise_for_status()
             cls._access_token = response.json()["access_token"]
             print("✅ OAuth токен успешно получен!")

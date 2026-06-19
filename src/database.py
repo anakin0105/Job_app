@@ -11,22 +11,30 @@ from dotenv import load_dotenv
 from src.api import Hh_handler
 from src.vacancies import Vacancy
 
-load_dotenv(override=True, encoding="utf-8")
+
+
+load_dotenv(encoding='utf-8')
+
+DB_NAME = os.getenv("DB_NAME", "Job")
+DB_USER = os.getenv("DB_USER", "postgres")
+DB_PASSWORD = os.getenv("DB_PASSWORD")
+DB_HOST = os.getenv("DB_HOST", "127.0.0.1")
+DB_PORT = os.getenv("DB_PORT", "5432")
 
 
 
 # Без dotenv — прямые значения
-DB_NAME = "Job"
-DB_USER = "postgres"
-DB_PASSWORD = "Anna2301"
-DB_HOST = "127.0.0.1"
-DB_PORT = "5432"
-
-print("=== DEBUG ===")
-print(f"DB_NAME = '{DB_NAME}'")
-print(f"DB_USER = '{DB_USER}'")
-print(f"DB_HOST = '{DB_HOST}'")
-print("=============\n")
+# DB_NAME = "Job"
+# DB_USER = "postgres"
+# DB_PASSWORD = "Anna2301"
+# DB_HOST = "127.0.0.1"
+# DB_PORT = "5432"
+#
+# print("=== DEBUG ===")
+# print(f"DB_NAME = '{DB_NAME}'")
+# print(f"DB_USER = '{DB_USER}'")
+# print(f"DB_HOST = '{DB_HOST}'")
+# print("=============\n")
 
 
 def create_database() -> None:
